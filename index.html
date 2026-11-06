@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS PLAYGROUND v1.1</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="icons/manifest.json">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#0a0e27;color:#fff;font-family:ui-monospace,Menlo,Consolas,monospace}
+  header{padding:14px 16px;border-bottom:1px solid rgba(96,239,255,.2);background:rgba(10,14,39,.95)}
+  header h1{margin:0;font-size:20px;color:#00ff87}
+  header p{margin:4px 0 0;font-size:12px;color:rgba(96,239,255,.65)}
+  .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 16px;border-bottom:1px solid rgba(96,239,255,.2)}
+  .controls select{background:#1a1f3a;color:#00ff87;border:1px solid rgba(96,239,255,.3);border-radius:6px;padding:8px;font:inherit;font-size:12px}
+  button{padding:8px 10px;border-radius:6px;font:inherit;font-size:12px;cursor:pointer;background:rgba(0,255,135,.15);border:1px solid #00ff87;color:#00ff87}
+  button.secondary{background:rgba(96,239,255,.12);border-color:#60efff;color:#60efff}
+  button.pink{background:rgba(255,0,128,.12);border-color:#ff0080;color:#ff0080}
+  label{font-size:12px;color:rgba(96,239,255,.7)}
+  main{display:grid;grid-template-columns:1fr 1fr;gap:0;height:calc(100vh - 150px);min-height:420px}
+  .pane{display:flex;flex-direction:column;min-width:0;border-right:1px solid rgba(96,239,255,.2)}
+  .pane h2{margin:0;padding:8px 12px;font-size:12px;letter-spacing:2px;color:#60efff;border-bottom:1px solid rgba(96,239,255,.2)}
+  textarea{flex:1;width:100%;background:#1a1f3a;color:#00ff87;border:none;padding:10px;font:inherit;font-size:12px;line-height:1.5;resize:none}
+  textarea:focus{outline:none}
+  iframe{flex:1;width:100%;border:none;background:#030508}
+  #log{padding:8px 12px;font-size:12px;color:#60efff;border-top:1px solid rgba(96,239,255,.2);min-height:36px;white-space:pre-wrap;word-break:break-word}
+  #log.error{color:#ff0080}
+  #saved{padding:8px 12px;display:flex;flex-wrap:wrap;gap:6px;border-top:1px solid rgba(96,239,255,.2)}
+  #saved button{font-size:11px;padding:4px 8px}
+  .note{padding:8px 16px;font-size:12px;line-height:1.5;color:rgba(96,239,255,.65)}
+  @media (max-width:800px){
+    main{grid-template-columns:1fr;height:auto}
+    .pane{height:55vh}
+    iframe{height:100%}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>NEXUS PLAYGROUND v1.1</h1>
+  <p>Paste it. Run it. See it on your phone. No account, no upload to a server.</p>
+</header>
+<div class="controls">
+  <select id="modeSelect">
+    <option value="react">React (.jsx)</option>
+    <option value="react-libs">React + Libraries (Tailwind + icon shim)</option>
+    <option value="html">HTML</option>
+  </select>
+  <button id="runBtn">Run</button>
+  <label><input type="checkbox" id="autoRun" checked> Auto-run</label>
+  <button id="openBtn" class="secondary">Open file</button>
+  <input type="file" id="fileInput" accept=".jsx,.js,.html,.htm,.txt" hidden>
+  <button id="sampleReactBtn" class="secondary">Sample React</button>
+  <button id="sampleHtmlBtn" class="secondary">Sample HTML</button>
+  <button id="saveBtn" class="pink">Save snippet</button>
+  <button id="downloadBtn" class="secondary">Download code</button>
+</div>
+<main>
+  <div class="pane">
+    <h2>CODE</h2>
+    <textarea id="codeEditor" spellcheck="false"></textarea>
+    <div id="saved"></div>
+  </div>
+  <div class="pane">
+    <h2>PREVIEW</h2>
+    <iframe id="preview" sandbox="allow-scripts" title="preview"></iframe>
+    <div id="log">Ready — nothing sent anywhere.</div>
+  </div>
+</main>
+<p class="note">End-game note, built in: HTML mode works offline, no CDN. React mode needs internet for pinned React 18.3.1 + Babel 7 from a CDN (v1.1 fix: unpinned Babel now serves v8, which emits an import that a plain script cannot run — that was the "Script error." on the phone. React is now transformed by hand with the classic runtime, and a failed CDN or a bad line now reports its real message). React + Libraries also loads Tailwind Play from a CDN, and icon imports are shimmed in v1 — the icon is a placeholder box with the first letter, not the real icon set, so your layout and logic preview without crashing. Real icon loading is a v2 swap, not a rewrite. Imports from other packages are stripped and listed in the log.</p>
+<script type="text/plain" id="sample-react">import { useState, useEffect, useRef } from "react";
+export default function SampleApp() {
+  const [count, setCount] = useState(0);
+  const canvasRef = useRef(null);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let raf = 0;
+    let t = 0;
+    const draw = () => {
+      t += 0.05;
+      ctx.fillStyle = '#030508';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#00ff87';
+      for (let i = 0; i < 40; i++) {
+        const x = (i / 40) * canvas.width;
+        const y = canvas.height / 2 + Math.sin(x * 0.02 + t) * 40;
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      raf = requestAnimationFrame(draw);
+    };
+    draw();
+    return () => cancelAnimationFrame(raf);
+  }, []);
+  return (
+    <div style={{padding: 20, fontFamily: 'monospace', color: '#fff', background: '#030508', minHeight: '100vh'}}>
+      <h2 style={{color: '#00ff87'}}>Sample React App</h2>
+      <p>Count: {count}</p>
+      <button onClick={() => setCount(count + 1)} style={{padding: '8px 12px'}}>Tap +1</button>
+      <canvas ref={canvasRef} width={600} height={200} style={{width: '100%', marginTop: 16, border: '1px solid #60efff'}} />
+    </div>
+  );
+}
+</script>
+<script>
+var editor = document.getElementById('codeEditor');
+var modeSelect = document.getElementById('modeSelect');
+var preview = document.getElementById('preview');
+var logEl = document.getElementById('log');
+var savedEl = document.getElementById('saved');
+var CODE_KEY = 'nexusPlaygroundCodeV1';
+var MODE_KEY = 'nexusPlaygroundModeV1';
+var SAVED_KEY = 'nexusPlaygroundSavedV1';
+var runTimer = null;
+
+var SAMPLE_HTML = [
+'<!DOCTYPE html>',
+'<html><head><meta charset="UTF-8"><style>body{margin:0;background:#0a0e27;color:#fff;font-family:monospace;padding:20px} h1{color:#00ff87}</style></head>',
+'<body><h1>Sample HTML</h1><p id="msg">Tap the button.</p><button id="btn">Tap me</button>',
+'<script>document.getElementById("btn").addEventListener("click", function(){document.getElementById("msg").textContent="It works.";});<\/script>',
+'</body></html>'
+].join('\n');
+
+function setLog(msg, isError) {
+  logEl.textContent = msg;
+  logEl.className = isError ? 'error' : '';
+}
+window.addEventListener('message', function(e) {
+  if (e.data && e.data.type === 'playground-error') setLog('Preview error: ' + e.data.message, true);
+});
+
+function transformReact(code) {
+  var stripped = [];
+  var lucideIcons = [];
+  var componentName = null;
+  var out = code;
+  out = out.replace(/import\s+([^;]+?)\s+from\s+['"]([^'"]+)['"];?/g, function(match, names, source) {
+    if (source === 'react') return '';
+    if (source === 'lucide-react') {
+      var inner = names.replace(/[{}]/g, '');
+      inner.split(',').forEach(function(n) {
+        var name = n.trim().split(/\s+as\s+/)[0].trim();
+        if (name) lucideIcons.push(name);
+      });
+      return '';
+    }
+    stripped.push(source);
+    return '';
+  });
+  out = out.replace(/import\s+['"]([^'"]+)['"];?/g, function(match, source) { stripped.push(source); return ''; });
+  var m = out.match(/export\s+default\s+function\s+([A-Za-z_$][\w$]*)/);
+  if (m) {
+    componentName = m[1];
+    out = out.replace(/export\s+default\s+function\s+/, 'function ');
+  } else {
+    var m2 = out.match(/export\s+default\s+([A-Za-z_$][\w$]*)\s*;?/);
+    if (m2) {
+      componentName = m2[1];
+      out = out.replace(/export\s+default\s+[A-Za-z_$][\w$]*\s*;?/, '');
+    }
+  }
+  out = out.replace(/export\s+(const|function|class)\s+/g, '$1 ');
+  if (!componentName) {
+    var m3 = out.match(/function\s+([A-Z][\w$]*)\s*\(/);
+    var m4 = out.match(/const\s+([A-Z][\w$]*)\s*=\s*\(/);
+    componentName = (m3 && m3[1]) || (m4 && m4[1]) || 'App';
+  }
+  var shim = '';
+  lucideIcons.forEach(function(name) {
+    shim += 'const ' + name + ' = function(props){ return React.createElement("span", {style:{display:"inline-block",width:(props&&props.size)||16,height:(props&&props.size)||16,lineHeight:"16px",textAlign:"center",border:"1px solid currentColor",borderRadius:4,fontSize:10}}, "' + name.charAt(0) + '"); };\n';
+  });
+  var header = 'const {useState, useEffect, useRef, useMemo, useCallback} = React;\n' + shim;
+  out = header + out;
+  out = out.replace(/<\/script/gi, '<\\/script');
+  return {code: out, componentName: componentName, stripped: stripped, lucideIcons: lucideIcons};
+}
+
+function buildReactPreview(code, withLibs) {
+  var t = transformReact(code);
+  var tailwindTag = withLibs ? '<script src="https://cdn.tailwindcss.com" crossorigin="anonymous" onerror="window.__pgFail(\'Tailwind Play CDN\')"><\/script>' : '';
+  // v1.1 fix: Babel 8 (what unpkg serves unpinned) defaults preset-react to the
+  // automatic runtime, which emits `import ... from "react/jsx-runtime"` — an
+  // import in a classic script is a SyntaxError, reported only as "Script
+  // error." So we pin Babel 7 + React 18.3.1, and transform by hand with the
+  // classic runtime (React.createElement, no import) instead of relying on
+  // Babel's auto-transform of text/babel scripts. Every failure now reports
+  // its real message instead of "Script error."
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{margin:0;background:#030508;color:#fff;font-family:monospace} #root{min-height:100vh}</style>'
+    + '<script>window.__pgFail=function(n){parent.postMessage({type:"playground-error", message:"Failed to load "+n+" from CDN — check internet, then tap Run again."},"*");};window.addEventListener("error", function(e){var m=e.message||"Script error.";if(m==="Script error.")m="Script error (details hidden by the browser — usually a CDN script that failed to load; check internet, then tap Run again).";parent.postMessage({type:"playground-error", message:m},"*");});<\/script>'
+    + tailwindTag
+    + '<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous" onerror="window.__pgFail(\'React 18.3.1\')"><\/script>'
+    + '<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous" onerror="window.__pgFail(\'ReactDOM 18.3.1\')"><\/script>'
+    + '<script src="https://unpkg.com/@babel/standalone@7/babel.min.js" crossorigin="anonymous" onerror="window.__pgFail(\'Babel 7\')"><\/script>'
+    + '</head><body><div id="root"></div>'
+    + '<script type="text/plain" id="user-code">' + t.code + '<\/script>'
+    + '<script>try{if(typeof React==="undefined")throw new Error("React failed to load from CDN — check internet, then tap Run again.");if(typeof ReactDOM==="undefined")throw new Error("ReactDOM failed to load from CDN — check internet, then tap Run again.");if(typeof Babel==="undefined")throw new Error("Babel failed to load from CDN — check internet, then tap Run again.");var src=document.getElementById("user-code").textContent;var out;try{out=Babel.transform(src,{presets:[["react",{runtime:"classic"}]]}).code;}catch(te){throw new Error("Babel could not turn this JSX into JavaScript: "+te.message);}var fn=new Function("React","ReactDOM",out+"\\nReactDOM.createRoot(document.getElementById(\\"root\\")).render(React.createElement(' + t.componentName + '));");fn(React,ReactDOM);}catch(e){parent.postMessage({type:"playground-error", message:e.message},"*");}<\/script>'
+    + '</body></html>';
+  return {html: html, info: t};
+}
+
+function run() {
+  var mode = modeSelect.value;
+  var code = editor.value;
+  try { localStorage.setItem(CODE_KEY, code); } catch (e) {}
+  try { localStorage.setItem(MODE_KEY, mode); } catch (e) {}
+  if (mode === 'html') {
+    var html = code;
+    var catcher = '<script>window.addEventListener("error", function(e){ parent.postMessage({type:"playground-error", message: e.message}, "*"); });<\/script>';
+    if (html.indexOf('</body>') !== -1) html = html.replace('</body>', catcher + '</body>');
+    else html = html + catcher;
+    preview.srcdoc = html;
+    setLog('Running HTML — no transform, works offline.');
+    return;
+  }
+  var withLibs = (mode === 'react-libs');
+  var built = buildReactPreview(code, withLibs);
+  preview.srcdoc = built.html;
+  var msg = 'Running React — component: ' + built.info.componentName + (withLibs ? ' — Libraries mode: Tailwind CDN on, icon shim on.' : ' — React-only mode.');
+  if (built.info.lucideIcons.length) msg += ' Icon shim: ' + built.info.lucideIcons.join(', ') + ' (placeholder boxes, not real icons).';
+  if (built.info.stripped.length) msg += ' Stripped imports: ' + built.info.stripped.join(', ') + '.';
+  msg += ' React preview needs internet for the React + Babel CDNs.';
+  setLog(msg, false);
+}
+
+function loadSaved() {
+  var saved = [];
+  try { saved = JSON.parse(localStorage.getItem(SAVED_KEY) || '[]'); } catch (e) { saved = []; }
+  savedEl.innerHTML = '';
+  saved.forEach(function(s) {
+    var btn = document.createElement('button');
+    btn.textContent = s.name;
+    btn.addEventListener('click', function() {
+      editor.value = s.code;
+      modeSelect.value = s.mode || 'react';
+      run();
+      setLog('Loaded saved snippet: ' + s.name);
+    });
+    var del = document.createElement('button');
+    del.textContent = 'x';
+    del.className = 'secondary';
+    del.addEventListener('click', function() {
+      var next = saved.filter(function(x) { return x.id !== s.id; });
+      try { localStorage.setItem(SAVED_KEY, JSON.stringify(next)); } catch (e) {}
+      loadSaved();
+    });
+    savedEl.appendChild(btn);
+    savedEl.appendChild(del);
+  });
+}
+
+document.getElementById('runBtn').addEventListener('click', run);
+document.getElementById('autoRun').addEventListener('change', function() { if (this.checked) run(); });
+editor.addEventListener('input', function() {
+  if (!document.getElementById('autoRun').checked) return;
+  if (runTimer) clearTimeout(runTimer);
+  runTimer = setTimeout(run, 600);
+});
+modeSelect.addEventListener('change', run);
+document.getElementById('openBtn').addEventListener('click', function() { document.getElementById('fileInput').click(); });
+document.getElementById('fileInput').addEventListener('change', function(e) {
+  var file = e.target.files && e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function() {
+    editor.value = reader.result;
+    if (/\.html?$/.test(file.name)) modeSelect.value = 'html';
+    else if (/\.jsx?$/.test(file.name)) modeSelect.value = 'react';
+    run();
+    setLog('Loaded file: ' + file.name);
+  };
+  reader.readAsText(file);
+});
+document.getElementById('sampleReactBtn').addEventListener('click', function() {
+  editor.value = document.getElementById('sample-react').textContent.replace(/^\n/, '');
+  modeSelect.value = 'react';
+  run();
+});
+document.getElementById('sampleHtmlBtn').addEventListener('click', function() {
+  editor.value = SAMPLE_HTML;
+  modeSelect.value = 'html';
+  run();
+});
+document.getElementById('saveBtn').addEventListener('click', function() {
+  var name = prompt('Name this snippet:', 'Snippet ' + new Date().toLocaleTimeString());
+  if (!name) return;
+  var saved = [];
+  try { saved = JSON.parse(localStorage.getItem(SAVED_KEY) || '[]'); } catch (e) { saved = []; }
+  saved.push({id: Date.now(), name: name, mode: modeSelect.value, code: editor.value, savedAt: new Date().toISOString()});
+  try { localStorage.setItem(SAVED_KEY, JSON.stringify(saved)); } catch (e) {}
+  loadSaved();
+  setLog('Saved snippet: ' + name);
+});
+document.getElementById('downloadBtn').addEventListener('click', function() {
+  var ext = modeSelect.value === 'html' ? 'html' : 'jsx';
+  var blob = new Blob([editor.value], {type: 'text/plain'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'nexus-playground-code-' + Date.now() + '.' + ext;
+  a.click();
+  setTimeout(function() { URL.revokeObjectURL(a.href); }, 1000);
+});
+
+try {
+  var savedCode = localStorage.getItem(CODE_KEY);
+  var savedMode = localStorage.getItem(MODE_KEY);
+  if (savedMode) modeSelect.value = savedMode;
+  if (savedCode) editor.value = savedCode;
+  else editor.value = document.getElementById('sample-react').textContent.replace(/^\n/, '');
+} catch (e) {
+  editor.value = document.getElementById('sample-react').textContent.replace(/^\n/, '');
+}
+loadSaved();
+run();
+</script>
+</body>
+</html>
