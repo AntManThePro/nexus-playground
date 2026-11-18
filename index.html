@@ -6,6 +6,8 @@
 <title>NEXUS PLAYGROUND v1.1</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/favicon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icons/favicon-512.png">
 <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="manifest" href="icons/manifest.json">
@@ -72,6 +74,7 @@
   </div>
 </main>
 <p class="note">End-game note, built in: HTML mode works offline, no CDN. React mode needs internet for pinned React 18.3.1 + Babel 7 from a CDN (v1.1 fix: unpinned Babel now serves v8, which emits an import that a plain script cannot run — that was the "Script error." on the phone. React is now transformed by hand with the classic runtime, and a failed CDN or a bad line now reports its real message). React + Libraries also loads Tailwind Play from a CDN, and icon imports are shimmed in v1 — the icon is a placeholder box with the first letter, not the real icon set, so your layout and logic preview without crashing. Real icon loading is a v2 swap, not a rewrite. Imports from other packages are stripped and listed in the log.</p>
+<p class="note" style="text-align:center"><span id="antEgg" style="cursor:pointer;color:#00ff87;text-decoration:underline dotted">an ant was here</span> <span id="antEggMsg" style="font-size:11px;color:#00ff87"></span><br><span style="font-size:10px">Fine print: the ant is DoubleA&rsquo;s. He hid it here because every playground needs one bug that isn&rsquo;t a bug. Click it &mdash; it clicks back. Not perfect, just real &mdash; NEXUS.</span></p>
 <script type="text/plain" id="sample-react">import { useState, useEffect, useRef } from "react";
 export default function SampleApp() {
   const [count, setCount] = useState(0);
@@ -318,6 +321,10 @@ try {
 }
 loadSaved();
 run();
+</script>
+<script>
+// Easter egg: the ant. Tiny, harmless, clicks back.
+(function(){var a=document.getElementById('antEgg'),m=document.getElementById('antEggMsg');if(!a||!m)return;var n=0;a.addEventListener('click',function(){n++;m.textContent=n===1?'DoubleA pressed the ant. The ant pressed back. Playground status: still standing.':('The ant has been pressed '+n+' times. It regrets nothing.');});})();
 </script>
 </body>
 </html>
